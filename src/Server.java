@@ -7,6 +7,8 @@ import java.net.UnknownHostException;
 import java.util.Random;
 import java.util.Scanner;
 
+import javaapp05.maze.JavaApp05Maze;
+import static javaapp05.maze.JavaApp05Maze.*;
 
 public class Server {
 
@@ -15,6 +17,8 @@ public class Server {
 	    private int port;
 	    private Random random = new Random();
 	    private int answer = random.nextInt(100)+1;
+	    public JavaApp05Maze mazeController = new JavaApp05Maze();
+	    private char[][] theMaze;
 
 	    // constructor with port
 	    public Server(int port) throws IOException 
@@ -33,6 +37,13 @@ public class Server {
 	    }
 	    
 	    public void run(){
+	    	theMaze = buildMaze();
+	    	for (int i = 0; i < theMaze.length; i++) {
+	    		for (int j = 0; j < theMaze[0].length; j++) {
+	    			System.out.print(" " + theMaze[i][j]);
+				}
+	    		System.out.println();
+			}
 	        while (true) {
 	            Socket socket;
 	            hostIP = getHostIPAddr();
@@ -172,5 +183,6 @@ class ConnectionHandler extends Thread {
      } 
      this.in.close(); 
      this.out.close(); 
- } // end of method run 
+ } // end of method run
 } // end of class Client.ConnectionHandler
+
