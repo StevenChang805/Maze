@@ -70,6 +70,7 @@ public class Explorer {
             }
         }
         buildMaze();
+	    int[][] maze;
         myMaze = look();
         while (myMaze[1][1] != 'F') { //Only runs while not of the finish
             followRightWall();
