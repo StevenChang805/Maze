@@ -18,7 +18,10 @@ public class Server {
 	    private Random random = new Random();
 	    private int answer = random.nextInt(100)+1;
 	    public JavaApp05Maze mazeController = new JavaApp05Maze();
-	    private char[][] theMaze;
+	    public char[][] theMaze;
+	    public int[] startCoords;
+	    public int[] endCoords;
+	    public char[][] myMaze;
 
 	    // constructor with port
 	    public Server(int port) throws IOException 
@@ -35,15 +38,100 @@ public class Server {
 	            return null;
 	        }
 	    }
-	    
-	    public void run(){
+
+	    private void initializeMaze() {
 	    	theMaze = buildMaze();
-	    	for (int i = 0; i < theMaze.length; i++) {
-	    		for (int j = 0; j < theMaze[0].length; j++) {
-	    			System.out.print(" " + theMaze[i][j]);
+		}
+
+		public int[] getStart(char[][] maze) {
+			int startX = -1;
+			int startY = -1;
+			for (int i = 0; i < maze.length; i++) {
+				for (int j = 0; j < maze[i].length; j++) {
+					if (maze[i][j] == 'S') {
+						startX = i;
+						startY = j;
+					}
 				}
-	    		System.out.println();
 			}
+			return new int[]{startX, startY};
+		}
+
+		public int[] getEnd(char[][] maze) {
+			int endX = -1;
+			int endY = -1;
+			for (int i = 0; i < maze.length; i++) {
+				for (int j = 0; j < maze[i].length; j++) {
+					if (maze[i][j] == 'F') {
+						endX = i;
+						endY = j;
+					}
+				}
+			}
+			return new int[]{endX, endY};
+		}
+
+		public char[][] getMaze(int y, int x) {
+			char[][] myMaze = new char[3][3];
+	    	if ((x-1) < 0) {
+	    		myMaze[0][0] = '?';
+	    		myMaze[0][1] = '?';
+	    		myMaze[0][2] = '?';
+				myMaze[1][0] = theMaze[x][y-1];
+				myMaze[2][0] = theMaze[x+1][y-1];
+				myMaze[1][1] = theMaze[x][y];
+				myMaze[2][1] = theMaze[x+1][y];
+				myMaze[1][2] = theMaze[x][y+1];
+				myMaze[2][2] = theMaze[x+1][y+1];
+
+			} else if ((y-1) < 0) {
+				myMaze[0][0] = '?';
+				myMaze[1][0] = '?';
+				myMaze[2][0] = '?';
+				myMaze[0][1] = theMaze[x-1][y];
+				myMaze[1][1] = theMaze[x][y];
+				myMaze[2][1] = theMaze[x+1][y];
+				myMaze[0][2] = theMaze[x-1][y+1];
+				myMaze[1][2] = theMaze[x][y+1];
+				myMaze[2][2] = theMaze[x+1][y+1];
+			} else {
+				myMaze[0][0] = theMaze[x-1][y-1];
+				myMaze[1][0] = theMaze[x][y-1];
+				myMaze[2][0] = theMaze[x+1][y-1];
+				myMaze[0][1] = theMaze[x-1][y];
+				myMaze[1][1] = theMaze[x][y];
+				myMaze[2][1] = theMaze[x+1][y];
+				myMaze[0][2] = theMaze[x-1][y+1];
+				myMaze[1][2] = theMaze[x][y+1];
+				myMaze[2][2] = theMaze[x+1][y+1];
+			}
+
+			return myMaze;
+		}
+
+	public String encodeMaze(char[][] maze) {
+		StringBuilder encoded = new StringBuilder();
+		for (int i = 0; i < maze.length; i++) {
+			for (int j = 0; j < maze[0].length; j++) {
+				encoded.append(maze[i][j]);
+			}
+		}
+		return encoded.toString();
+	}
+
+	public boolean hasWon(int x, int y, int[] endCoords) {
+		if (x == endCoords[0] && y == endCoords[1]) {
+			return true;
+		}
+		return false;
+	}
+
+
+	public void run(){
+	    	initializeMaze();
+	    	startCoords = getStart(theMaze);
+	    	endCoords = getEnd(theMaze);
+	    	myMaze = getMaze(startCoords[0], startCoords[1]);
 	        while (true) {
 	            Socket socket;
 	            hostIP = getHostIPAddr();
@@ -93,7 +181,7 @@ public class Server {
 
 //Client.ConnectionHandler class
 class ConnectionHandler extends Thread {
- 
+
  final Scanner in;
  final PrintWriter out;
  final Socket s;
@@ -104,8 +192,10 @@ class ConnectionHandler extends Thread {
  KnownCommands cmd;
  private String response = "CONNECTING";
  private Server server;
+ private int clientX;
+ private int clientY;
+ private int[] endCoords;
 
- 
  // Constructor 
  public ConnectionHandler(Socket s,
                         Scanner input,
@@ -116,6 +206,9 @@ class ConnectionHandler extends Thread {
      this.out = output;
      this.remoteIP = s.getInetAddress();
      this.server = server;
+     this.clientX = server.startCoords[0];
+     this.clientY = server.startCoords[1];
+     this.endCoords = server.endCoords;
  } // end of Client.ConnectionHandler constructor()
 
 	private static boolean isInteger(String s) {
@@ -130,47 +223,31 @@ class ConnectionHandler extends Thread {
 
  
  private boolean getCommand() {
- 	 int guess = 0;
-	 out.println(response);
-	 System.out.println("SERVER:>"+response);
+	 char[][] currentMaze = server.getMaze(clientX, clientY);
 	 String command = in.nextLine();
-	 if (isInteger(command)) {
-		 guess = Integer.parseInt(command);
-		 cmd = KnownCommands.NUMBER;
-	 } else {
-		 cmd = KnownCommands.getCommand(command);
-		 System.out.println("SERVER:<" + cmd);
-	 }
-	 int answer = server.getAnswer(guess);
+	 KnownCommands cmd = KnownCommands.getCommand(command);
 	 switch (cmd) {
-		 case CONNECTED:
-			 response = "GUESS";
-			 break;
-		 case NUMBER:
-		 	 if (answer == 0) {
-		 	 	response = "LOSE";
-		 	 	break;
-			 }
-		 	 if (guess > answer) {
-		 	 	response = "HIGHER";
-			 } else if (guess < answer) {
-		 	 	response = "LOWER";
-			 } else {
-		 	 	response = "WIN";
-			 }
-			 break;
-		 case YES:
-		 	response = "GUESS";
-		 case NO:
-		 case EXIT:
-		 	response = "EXIT";
-		 	out.println(response);
-		 	System.out.println("SERVER:>"+response);
-		 	return true;
+		 case UP:
+			 clientY--;
+		 case DOWN:
+			 clientY++;
+		 case LEFT:
+			 clientX--;
+		 case RIGHT:
+			 clientX++;
 		 default:
 			 break;
 	 }
-	 return ended;
+	 if (server.hasWon(clientX, clientY, endCoords)) {
+		 out.println("WIN");
+		 System.out.println("SERVER:> WIN");
+		 return true;
+	 }
+	 else {
+		 out.println(server.encodeMaze(currentMaze));
+		 System.out.println("SERVER:> SEND");
+	 }
+	 return false;
  } // end of method getCommand()
 
  @Override
