@@ -203,6 +203,7 @@ class ConnectionHandler extends Thread {
  private int clientY;
  private int[] endCoords;
  private boolean hasBegun = false;
+ private char[][] currentMaze;
 
  // Constructor 
  public ConnectionHandler(Socket s,
@@ -217,6 +218,7 @@ class ConnectionHandler extends Thread {
      this.clientX = server.startCoords[0];
      this.clientY = server.startCoords[1];
      this.endCoords = server.endCoords;
+     currentMaze = server.getMaze(clientX, clientY);
  } // end of Client.ConnectionHandler constructor()
 
 	private static boolean isInteger(String s) {
@@ -231,7 +233,6 @@ class ConnectionHandler extends Thread {
 
  
  private boolean getCommand() {
-	 char[][] currentMaze = server.getMaze(clientX, clientY);
 	 if (!hasBegun) {
 		 out.println(server.encodeMaze(currentMaze));
 	 }
@@ -250,6 +251,7 @@ class ConnectionHandler extends Thread {
 		 default:
 			 break;
 	 }
+	 currentMaze = server.getMaze(clientX, clientY);
 	 if (server.hasWon(clientX, clientY, endCoords)) {
 		 out.println("WIN");
 		 System.out.println("SERVER:> WIN");
