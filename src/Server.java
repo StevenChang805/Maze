@@ -242,15 +242,20 @@ class ConnectionHandler extends Thread {
 	 switch (cmd) {
 		 case UP:
 			 clientY--;
+			 break;
 		 case DOWN:
 			 clientY++;
+			 break;
 		 case LEFT:
 			 clientX--;
+			 break;
 		 case RIGHT:
 			 clientX++;
+			 break;
 		 default:
 			 break;
 	 }
+	 System.out.println(clientX + " " + clientY);
 	 currentMaze = server.getMaze(clientX, clientY);
 	 if (server.hasWon(clientX, clientY, endCoords)) {
 		 out.println("WIN");
