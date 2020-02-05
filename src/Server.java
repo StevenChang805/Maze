@@ -40,7 +40,14 @@ public class Server {
 	    }
 
 	    private void initializeMaze() {
-	    	theMaze = buildMaze();
+			theMaze = buildMaze();
+	    	char[][] transposedMaze = new char[theMaze[0].length][theMaze.length];
+	    	for (int i = 0; i < theMaze.length; i++) {
+	    		for (int j = 0; j < theMaze[0].length; j++) {
+	    			transposedMaze[j][i] = theMaze[i][j];
+				}
+			}
+	    	theMaze = transposedMaze;
 		}
 
 		public int[] getStart(char[][] maze) {
@@ -71,7 +78,7 @@ public class Server {
 			return new int[]{endX, endY};
 		}
 
-		public char[][] getMaze(int y, int x) {
+		public char[][] getMaze(int x, int y) {
 			char[][] myMaze = new char[3][3];
 	    	if ((x-1) < 0) {
 	    		myMaze[0][0] = '?';
@@ -195,6 +202,8 @@ class ConnectionHandler extends Thread {
  private int clientX;
  private int clientY;
  private int[] endCoords;
+ private boolean hasBegun = false;
+ private char[][] currentMaze;
 
  // Constructor 
  public ConnectionHandler(Socket s,
@@ -209,6 +218,7 @@ class ConnectionHandler extends Thread {
      this.clientX = server.startCoords[0];
      this.clientY = server.startCoords[1];
      this.endCoords = server.endCoords;
+     currentMaze = server.getMaze(clientX, clientY);
  } // end of Client.ConnectionHandler constructor()
 
 	private static boolean isInteger(String s) {
@@ -223,7 +233,10 @@ class ConnectionHandler extends Thread {
 
  
  private boolean getCommand() {
-	 char[][] currentMaze = server.getMaze(clientX, clientY);
+	 if (!hasBegun) {
+		 out.println(server.encodeMaze(currentMaze));
+	 }
+	 hasBegun = true;
 	 String command = in.nextLine();
 	 KnownCommands cmd = KnownCommands.getCommand(command);
 	 switch (cmd) {
@@ -238,6 +251,7 @@ class ConnectionHandler extends Thread {
 		 default:
 			 break;
 	 }
+	 currentMaze = server.getMaze(clientX, clientY);
 	 if (server.hasWon(clientX, clientY, endCoords)) {
 		 out.println("WIN");
 		 System.out.println("SERVER:> WIN");
@@ -245,7 +259,7 @@ class ConnectionHandler extends Thread {
 	 }
 	 else {
 		 out.println(server.encodeMaze(currentMaze));
-		 System.out.println("SERVER:> SEND");
+		 System.out.println("SERVER:> " + server.encodeMaze(currentMaze));
 	 }
 	 return false;
  } // end of method getCommand()
