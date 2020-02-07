@@ -242,10 +242,13 @@ class ConnectionHandler extends Thread {
 	 switch (cmd) {
 		 case UP:
 			 clientY--;
+			 break;
 		 case DOWN:
 			 clientY++;
+			 break;
 		 case LEFT:
 			 clientX--;
+			 break;
 		 case RIGHT:
 			 clientX++;
 		 default:
