@@ -60,7 +60,7 @@ public class JavaApp05Maze {
      * will be positioned at the start of the maze, which is at the top,
      * the user will be facing down
      */
-    public static void buildVeryLargeMaze(){
+    public static char[][] buildVeryLargeMaze(){
         MazeGenerator mg = new JavaApp05Maze().new MazeGenerator();
         int width = 200;
         int height = 120;
@@ -70,6 +70,7 @@ public class JavaApp05Maze {
         mn = new JavaApp05Maze().new MazeNavigate(theMaze, posn);
         mc = new JavaApp05Maze().new MazeCompare(theMaze, posn);
         md.display(theMaze);
+        return theMaze;
     }
     
     

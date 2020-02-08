@@ -84,13 +84,12 @@ public class Server {
 	    		myMaze[0][0] = '?';
 	    		myMaze[0][1] = '?';
 	    		myMaze[0][2] = '?';
-				myMaze[1][0] = theMaze[x][y-1];
-				myMaze[2][0] = theMaze[x+1][y-1];
-				myMaze[1][1] = theMaze[x][y];
-				myMaze[2][1] = theMaze[x+1][y];
+				myMaze[1][0] = theMaze[x-1][y-1];
+				myMaze[2][0] = theMaze[x][y-1];
+				myMaze[1][1] = theMaze[x-1][y];
+				myMaze[2][1] = theMaze[x][y];
 				myMaze[1][2] = theMaze[x][y+1];
 				myMaze[2][2] = theMaze[x+1][y+1];
-
 			} else if ((y-1) < 0) {
 				myMaze[0][0] = '?';
 				myMaze[1][0] = '?';
@@ -101,7 +100,27 @@ public class Server {
 				myMaze[0][2] = theMaze[x-1][y+1];
 				myMaze[1][2] = theMaze[x][y+1];
 				myMaze[2][2] = theMaze[x+1][y+1];
-			} else {
+			} else if ((x+1) >= theMaze.length) {
+				myMaze[0][0] = theMaze[x-1][y-1];
+				myMaze[1][0] = theMaze[x][y-1];
+				myMaze[2][0] = '?';
+				myMaze[0][1] = theMaze[x-1][y];
+				myMaze[1][1] = theMaze[x][y];
+				myMaze[2][1] = '?';
+				myMaze[0][2] = theMaze[x-1][y+1];
+				myMaze[1][2] = theMaze[x][y+1];
+				myMaze[2][2] = '?';
+			} else if ((y+1) >= theMaze[0].length) {
+				myMaze[0][0] = theMaze[x-1][y-1];
+				myMaze[1][0] = theMaze[x][y-1];
+				myMaze[2][0] = theMaze[x+1][y-1];
+				myMaze[0][1] = theMaze[x-1][y];
+				myMaze[1][1] = theMaze[x][y];
+				myMaze[2][1] = theMaze[x+1][y];
+				myMaze[0][2] = '?';
+				myMaze[1][2] = '?';
+				myMaze[2][2] = '?';
+	    	} else {
 				myMaze[0][0] = theMaze[x-1][y-1];
 				myMaze[1][0] = theMaze[x][y-1];
 				myMaze[2][0] = theMaze[x+1][y-1];
@@ -112,7 +131,6 @@ public class Server {
 				myMaze[1][2] = theMaze[x][y+1];
 				myMaze[2][2] = theMaze[x+1][y+1];
 			}
-
 			return myMaze;
 		}
 
@@ -241,28 +259,35 @@ class ConnectionHandler extends Thread {
 	 KnownCommands cmd = KnownCommands.getCommand(command);
 	 switch (cmd) {
 		 case UP:
-			 clientY--;
+			 if ((currentMaze[1][0] != '#') && (currentMaze[1][0] != '?')) {
+				 clientY--;
+			 }
 			 break;
 		 case DOWN:
-			 clientY++;
+			 if ((currentMaze[1][2] != '#') && (currentMaze[1][2] != '?')) {
+				 clientY++;
+			 }
 			 break;
 		 case LEFT:
-			 clientX--;
+			 if ((currentMaze[0][1] != '#') && (currentMaze[0][1] != '?')) {
+				 clientX--;
+			 }
 			 break;
 		 case RIGHT:
-			 clientX++;
+			 if ((currentMaze[2][1] != '#') && (currentMaze[2][1] != '?')) {
+				 clientX++;
+			 }
 			 break;
 		 default:
 			 break;
 	 }
 	 System.out.println(clientX + " " + clientY);
-	 currentMaze = server.getMaze(clientX, clientY);
 	 if (server.hasWon(clientX, clientY, endCoords)) {
 		 out.println("WIN");
 		 System.out.println("SERVER:> WIN");
 		 return true;
-	 }
-	 else {
+	 } else {
+		 currentMaze = server.getMaze(clientX, clientY);
 		 out.println(server.encodeMaze(currentMaze));
 		 System.out.println("SERVER:> " + server.encodeMaze(currentMaze));
 	 }

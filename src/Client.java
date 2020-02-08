@@ -13,6 +13,9 @@ public class Client extends Thread{
     
     private final String address;
     private final int    port;
+    private char[][] foundMaze = new char[40][60];
+    int currentX = 30;
+    int currentY = 1;
 
  // constructor to put ip address and port 
     public Client(String address, int port) 
@@ -40,8 +43,6 @@ public class Client extends Thread{
         }
     }
 
-
-
     public void run(){
         // establish a connection 
         try
@@ -56,7 +57,7 @@ public class Client extends Thread{
         { 
             System.out.println("CLIENT::"+e.getMessage());
             try {
-				System.out.println("Conncting with IP address " + InetAddress.getLocalHost()
+				System.out.println("Connecting with IP address " + InetAddress.getLocalHost()
 				        + " , to server with IP Address " + address
 				        + " using port " +  port);
 			} catch (UnknownHostException e1) {
@@ -65,21 +66,133 @@ public class Client extends Thread{
             return;
         }
         char[][] currentMaze;
+        String decision;
+        initializeMaze(foundMaze);
         do {
             String command = input.nextLine();
             if (command.equals("WIN")) {
+                System.out.println("CLIENT:<WIN");
+                cleanMaze();
+                printMaze(foundMaze);
                 return;
             }
             currentMaze = decodeMaze(command);
+            transferMaze(currentMaze, currentX, currentY);
             printMaze(currentMaze);
             Scanner scanner = new Scanner(System.in);
             System.out.print("Enter the direction you would like to move in: ");
-            String decision = scanner.next().toUpperCase();
+            decision = scanner.next().toUpperCase();
+            if (decision.equals("W")) {
+                decision = "UP";
+                if (currentMaze[0][1] == '.') {
+                    currentY--;
+                }
+            } else if (decision.equals("A")) {
+                decision = "LEFT";
+                if (currentMaze[1][0] == '.') {
+                    currentX--;
+                }
+            } else if (decision.equals("S")) {
+                decision = "DOWN";
+                if (currentMaze[2][1] == '.') {
+                    currentY++;
+                }
+            } else if (decision.equals("D")) {
+                decision = "RIGHT";
+                if (currentMaze[1][2] == '.') {
+                    currentX++;
+                }
+            }
             output.println(decision);
-            System.out.println("CLIENT:> " + decision);
+            System.out.println("CLIENT:>" + decision);
         } while (true);
-    } 
-  
+    }
+
+    private void transferMaze(char[][] currentMaze, int currentX, int currentY) {
+        for (int i = 0; i < currentMaze.length; i++) {
+            for (int j = 0; j < currentMaze[0].length; j++) {
+                foundMaze[currentY+j-1][currentX+i-1] = currentMaze[j][i];
+            }
+        }
+    }
+
+    private void cleanMaze() {
+        char[][] refinedMaze;
+        int startingColumn = 0;
+        int endingColumn = foundMaze[0].length;
+        int startingRow = 0;
+        int endingRow = foundMaze.length;
+
+        // finds index of column to start copying from
+        for (int i = 0; i < foundMaze[0].length; i++) {
+            for (int j = 0; j < foundMaze.length; j++) {
+                if (foundMaze[j][i] != '?') {
+                    // once we target the first non-occurrence of '?', assign value of column to startingColumn
+                    startingColumn = i;
+                    break;
+                }
+            }
+        }
+        // finds index of column to end copying
+        for (int i = foundMaze[0].length - 1; i >= 0; i--) {
+            for (int j = foundMaze.length - 1; j >= 0; j--) {
+                if (foundMaze[j][i] != '?') {
+                    endingColumn = i;
+                    break;
+                }
+            }
+        }
+        // finds index of row to start copying from
+        for (int i = 0; i < foundMaze.length; i++) {
+            for (int j = 0; j < foundMaze[0].length; j++) {
+                if (foundMaze[i][j] != '?') {
+                    startingRow = i;
+                    break;
+                }
+            }
+        }
+        // finds index of row to end copying from
+        for (int i = foundMaze.length - 1; i >= 0; i--) {
+            for (int j = foundMaze[0].length - 1; j >= 0; j--) {
+                if (foundMaze[i][j] != '?') {
+                    endingRow = i;
+                    break;
+                }
+            }
+        }
+        // finds row and column lengths
+        int rowLength = startingRow - endingRow;
+        int columnLength = startingColumn - endingColumn;
+        // initializes refinedMaze
+        refinedMaze = new char[rowLength + 1][columnLength + 1];
+        initializeMaze(refinedMaze);
+        for (int i = 0; i < rowLength + 1; i++) {
+            if (columnLength + 1 >= 0)
+                // copies the maze
+                System.arraycopy(foundMaze[endingRow + i], endingColumn, refinedMaze[i], 0, columnLength + 1);
+        }
+        foundMaze = refinedMaze;
+    }
+
+    private boolean isSameMaze(char[][] maze1, char[][] maze2) {
+        boolean isSame = true;
+        for (int i = 0; i < maze1.length; i++) {
+            for (int j = 0; j < maze1[0].length; j++) {
+                if( maze1[i][j] != maze2[i][j]) {
+                    isSame = false;
+                }
+            }
+        }
+        return isSame;
+    }
+
+    private void initializeMaze(char[][] maze) {
+        for (int i = 0; i < maze.length; i++) {
+            for (int j = 0; j < maze[0].length; j++) {
+                maze[i][j] = '?';
+            }
+        }
+    }
     
     public void exit(){
         output.println(KnownCommands.EXIT);
@@ -88,7 +201,7 @@ public class Client extends Thread{
     public static void main(String args[]) 
     {
         int port     = 7177;
-        String IPAddr  = "10.50.0.236";
+        String IPAddr  = "192.168.99.174";
         Thread client = new Client(IPAddr, port);
         client.start();
     } 
