@@ -7,18 +7,18 @@ import java.util.Scanner;
 
 
 public class Client extends Thread{
-    private Socket       socket    = null; 
-    private Scanner      input     = null; 
+    private Socket       socket    = null;
+    private Scanner      input     = null;
     private PrintWriter  output    = null;
-    
+
     private final String address;
     private final int    port;
     private char[][] foundMaze = new char[40][60];
     int currentX = 30;
     int currentY = 1;
 
- // constructor to put ip address and port 
-    public Client(String address, int port) 
+    // constructor to put ip address and port
+    public Client(String address, int port)
     {
         this.address = address;
         this.port = port;
@@ -44,25 +44,25 @@ public class Client extends Thread{
     }
 
     public void run(){
-        // establish a connection 
+        // establish a connection
         try
-        { 
-            socket = new Socket(address, port); 
+        {
+            socket = new Socket(address, port);
             System.out.println("CLIENT::Connected");
-            // sends output to the socket 
+            // sends output to the socket
             input = new Scanner(socket.getInputStream());
-            output = new PrintWriter(socket.getOutputStream(),true); 
-        } 
-        catch(IOException e) 
-        { 
+            output = new PrintWriter(socket.getOutputStream(),true);
+        }
+        catch(IOException e)
+        {
             System.out.println("CLIENT::"+e.getMessage());
             try {
-				System.out.println("Connecting with IP address " + InetAddress.getLocalHost()
-				        + " , to server with IP Address " + address
-				        + " using port " +  port);
-			} catch (UnknownHostException e1) {
-				e1.printStackTrace();
-			}
+                System.out.println("Connecting with IP address " + InetAddress.getLocalHost()
+                        + " , to server with IP Address " + address
+                        + " using port " +  port);
+            } catch (UnknownHostException e1) {
+                e1.printStackTrace();
+            }
             return;
         }
         char[][] currentMaze;
@@ -84,22 +84,22 @@ public class Client extends Thread{
             decision = scanner.next().toUpperCase();
             if (decision.equals("W")) {
                 decision = "UP";
-                if (currentMaze[0][1] == '.') {
+                if (currentMaze[1][0] == '.' || currentMaze[1][0] == 'F'|| currentMaze[1][0] == 'S') {
                     currentY--;
                 }
             } else if (decision.equals("A")) {
                 decision = "LEFT";
-                if (currentMaze[1][0] == '.') {
+                if (currentMaze[1][0] == '.' || currentMaze[1][0] == 'F'|| currentMaze[1][0] == 'S') {
                     currentX--;
                 }
             } else if (decision.equals("S")) {
                 decision = "DOWN";
-                if (currentMaze[2][1] == '.') {
+                if (currentMaze[1][0] == '.' || currentMaze[1][0] == 'F'|| currentMaze[1][0] == 'S') {
                     currentY++;
                 }
             } else if (decision.equals("D")) {
                 decision = "RIGHT";
-                if (currentMaze[1][2] == '.') {
+                if (currentMaze[1][0] == '.' || currentMaze[1][0] == 'F'|| currentMaze[1][0] == 'S') {
                     currentX++;
                 }
             }
@@ -174,18 +174,6 @@ public class Client extends Thread{
         foundMaze = refinedMaze;
     }
 
-    private boolean isSameMaze(char[][] maze1, char[][] maze2) {
-        boolean isSame = true;
-        for (int i = 0; i < maze1.length; i++) {
-            for (int j = 0; j < maze1[0].length; j++) {
-                if( maze1[i][j] != maze2[i][j]) {
-                    isSame = false;
-                }
-            }
-        }
-        return isSame;
-    }
-
     private void initializeMaze(char[][] maze) {
         for (int i = 0; i < maze.length; i++) {
             for (int j = 0; j < maze[0].length; j++) {
@@ -193,17 +181,17 @@ public class Client extends Thread{
             }
         }
     }
-    
+
     public void exit(){
         output.println(KnownCommands.EXIT);
     } // end of method exit()
 
-    public static void main(String args[]) 
+    public static void main(String args[])
     {
         int port     = 7177;
-        String IPAddr  = "192.168.99.174";
+        String IPAddr  = "10.50.0.236";
         Thread client = new Client(IPAddr, port);
         client.start();
-    } 
-    
+    }
+
 }
