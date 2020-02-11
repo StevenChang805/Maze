@@ -13,9 +13,9 @@ public class Client extends Thread{
     
     private final String address;
     private final int    port;
-    public static char[][] foundMaze = new char[20][60];
+    public static char[][] foundMaze = new char[23][60];
     private int clientY = 1;
-    private int clientX = 0;
+    private int clientX = 30;
 
 
     // constructor to put ip address and port
@@ -90,6 +90,7 @@ public class Client extends Thread{
             currentMaze = decodeMaze(command);
             printMaze(currentMaze);
             Scanner scanner = new Scanner(System.in);
+            addToMaze(currentMaze, clientY, clientX);
             System.out.print("Enter the direction you would like to move in: ");
             String decision = scanner.next().toUpperCase();
             switch (decision){
@@ -115,19 +116,29 @@ public class Client extends Thread{
             System.out.println();
             switch (decision) {
                 case "UP":
-                    clientY--;
+                    if ((currentMaze[1][0] != '#') && (currentMaze[1][0] != '?')) {
+                        clientY--;
+                    }
                     break;
                 case "DOWN":
-                    clientY++;
+                    if ((currentMaze[1][2] != '#') && (currentMaze[1][2] != '?')) {
+                        clientY++;
+                    }
                     break;
                 case "LEFT":
-                    clientX--;
+                    if ((currentMaze[0][1] != '#') && (currentMaze[0][1] != '?')) {
+                        clientX--;
+                    }
                     break;
                 case "RIGHT":
-                    clientX++;
+                    if ((currentMaze[2][1] != '#') && (currentMaze[2][1] != '?')) {
+                        clientX++;
+                    }
+                    break;
                 default:
                     break;
             }
+            printMaze(foundMaze);
 
         } while (true);
     } 
