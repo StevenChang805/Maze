@@ -278,5 +278,5 @@ class ConnectionHandler extends Thread {
      this.in.close(); 
      this.out.close(); 
  } // end of method run
-} // end of class Client.ConnectionHandler
+} // end of class Client.ConnectionHandler a
 
