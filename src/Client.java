@@ -87,24 +87,25 @@ public class Client extends Thread{
             System.out.print("Enter the direction you would like to move in: ");
             decision = scanner.next().toUpperCase();
             if (decision.equals("W")) {
-                decision = "UP";
-                if (currentMaze[1][0] == '.' || currentMaze[1][0] == 'F'|| currentMaze[1][0] == 'S') {
+                if (currentMaze[0][1] == '.' || currentMaze[0][1] == 'F'|| currentMaze[0][1] == 'S') {
                     currentY--;
+                    decision = "UP";
                 }
             } else if (decision.equals("A")) {
-                decision = "LEFT";
+
                 if (currentMaze[1][0] == '.' || currentMaze[1][0] == 'F'|| currentMaze[1][0] == 'S') {
                     currentX--;
+                    decision = "LEFT";
                 }
             } else if (decision.equals("S")) {
-                decision = "DOWN";
-                if (currentMaze[1][0] == '.' || currentMaze[1][0] == 'F'|| currentMaze[1][0] == 'S') {
+                if (((currentMaze[2][1] == '.') || (currentMaze[2][1] == 'F')|| (currentMaze[2][1] == 'S'))) {
                     currentY++;
+                    decision = "DOWN";
                 }
             } else if (decision.equals("D")) {
-                decision = "RIGHT";
-                if (currentMaze[1][0] == '.' || currentMaze[1][0] == 'F'|| currentMaze[1][0] == 'S') {
+                if (currentMaze[1][2] == '.' || currentMaze[1][2] == 'F'|| currentMaze[1][2] == 'S') {
                     currentX++;
+                    decision = "RIGHT";
                 }
             }
             output.println(decision);
