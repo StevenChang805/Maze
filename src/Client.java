@@ -77,6 +77,10 @@ public class Client extends Thread{
                 return;
             }
             currentMaze = decodeMaze(command);
+            if (currentMaze[1][1] == 'X') {
+                System.out.println("CLIENT:<LOSE");
+                return;
+            }
             transferMaze(currentMaze, currentX, currentY);
             printMaze(currentMaze);
             Scanner scanner = new Scanner(System.in);

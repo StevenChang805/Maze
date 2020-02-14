@@ -118,6 +118,11 @@ public class Server {
 
 	public String encodeMaze(char[][] maze) {
 		StringBuilder encoded = new StringBuilder();
+		if (maze[1][1] == 'F') {
+			for (int i = 0; i < maze.length*maze[0].length; i++) {
+				encoded.append('X');
+			}
+		}
 		for (int i = 0; i < maze.length; i++) {
 			for (int j = 0; j < maze[0].length; j++) {
 				encoded.append(maze[i][j]);
